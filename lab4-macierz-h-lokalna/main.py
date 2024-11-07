@@ -1,14 +1,15 @@
 import numpy as np
 
 
+# Funkcja do wczytywania współrzędnych węzłów z pliku
 def czytaj_wspolrzedne(plik):
     ksi = []
     eta = []
     with open(plik, 'r') as f:
         for line in f:
             values = list(map(float, line.split()))
-            ksi.append(values[0:4])
-            eta.append(values[4:8])
+            ksi.append(values[0:4])  # Zakładamy, że mamy 4 węzły dla każdego elementu
+            eta.append(values[4:8])  # Kolejne 4 wartości to eta dla tych samych węzłów
     return np.array(ksi), np.array(eta)
 
 
@@ -48,53 +49,60 @@ def odwrotnosc_jakobianu(J):
     return np.linalg.inv(J)
 
 
-# Funkcja główna - przetwarza wszystkie punkty całkowania
-def oblicz_jakobian(plik):
+# Funkcja do obliczania macierzy H lokalnej
+def oblicz_macierz_H_lokalna(wsp_x, wsp_y, punkty_calek, wagi_calek, k):
+    H = np.zeros((4, 4))  # Inicjalizacja lokalnej macierzy H
+    for i, (ksi_pkt, eta_pkt) in enumerate(punkty_calek):
+        waga = wagi_calek[i]
+        dN_dksi, dN_deta = pochodne_funkcji_ksztaltu(ksi_pkt, eta_pkt)
+        J = jakobian(wsp_x, wsp_y, dN_dksi, dN_deta)
+        detJ = det_jakobianu(J)
+        if detJ == 0:
+            continue  # Pomijamy punkt, jeśli wyznacznik Jacobiego jest zerowy
+        J_inv = odwrotnosc_jakobianu(J)
+
+        # Obliczanie pochodnych względem x i y
+        dN_dx = J_inv[0, 0] * dN_dksi + J_inv[0, 1] * dN_deta
+        dN_dy = J_inv[1, 0] * dN_dksi + J_inv[1, 1] * dN_deta
+
+        # Składanie macierzy H
+        H_local = k * (np.outer(dN_dx, dN_dx) + np.outer(dN_dy, dN_dy)) * detJ * waga
+        H += H_local
+    return H
+
+
+# Funkcja główna - przetwarza wszystkie elementy i oblicza macierz H
+def oblicz_H_dla_elementow(plik, k):
     ksi_wsp, eta_wsp = czytaj_wspolrzedne(plik)
 
-    # 4-punktowa kwadratura Gaussa w 1D
+    # Definiowanie punktów Gaussa i wag
     punkty_1D = [-np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5))),
                  -np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
                  np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
                  np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5)))]
-
     wagi_1D = [(18 - np.sqrt(30)) / 36,
                (18 + np.sqrt(30)) / 36,
                (18 + np.sqrt(30)) / 36,
                (18 - np.sqrt(30)) / 36]
 
-    # Tworzymy siatkę punktów Gaussa dla 2D (iloczyn kartezjański)
+    # Tworzenie siatki punktów Gaussa dla 2D (iloczyn kartezjański)
     punkty_calek = [(ksi, eta) for ksi in punkty_1D for eta in punkty_1D]
     wagi_calek = [w1 * w2 for w1 in wagi_1D for w2 in wagi_1D]
 
-    # Iteracja przez punkty całkowania
-    for i, (ksi_pkt, eta_pkt) in enumerate(punkty_calek):
-        dN_dksi, dN_deta = pochodne_funkcji_ksztaltu(ksi_pkt, eta_pkt)
+    # Iteracja przez elementy
+    for elem in range(len(ksi_wsp)):
+        wsp_x = ksi_wsp[elem]
+        wsp_y = eta_wsp[elem]
 
-        for elem in range(len(ksi_wsp)):  # Iteracja przez elementy
-            wsp_x = ksi_wsp[elem]
-            wsp_y = eta_wsp[elem]
+        # Obliczenie lokalnej macierzy H
+        H = oblicz_macierz_H_lokalna(wsp_x, wsp_y, punkty_calek, wagi_calek, k)
 
-            # Obliczenie Jakobianu w punkcie całkowania
-            J = jakobian(wsp_x, wsp_y, dN_dksi, dN_deta)
-            detJ = det_jakobianu(J)
-
-            if detJ != 0:
-                J_inv = odwrotnosc_jakobianu(J)
-            else:
-                J_inv = None
-
-            # Wyświetlenie wyników
-            print(f"Element {elem+1}, Punkt całkowania {i+1}: ({ksi_pkt}, {eta_pkt})")
-            print(f"Jakobian [J]:\n{J}")
-            print(f"Wyznacznik det[J]: {detJ}")
-            if J_inv is not None:
-                print(f"Odwrotność [J^-1]:\n{J_inv}")
-            else:
-                print("Jakobian jest osobliwy, brak odwrotności.")
-            print("\n")
+        # Wyświetlenie macierzy H dla elementu
+        print(f"Element {elem + 1}:")
+        print(f"Lokalna macierz H:\n{H}\n")
 
 
+# Przykładowe wywołanie
 if __name__ == "__main__":
-    # Przykład użycia funkcji - załóżmy, że mamy plik 'wspolrzedne.txt'
-    oblicz_jakobian('wspolrzedne.txt')
+    k = 1.0  # Przykładowy współczynnik przewodzenia ciepła
+    oblicz_H_dla_elementow('wspolrzedne.txt', k)
