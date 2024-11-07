@@ -1,15 +1,16 @@
 import numpy as np
 
-# Funkcja do wczytywania współrzędnych węzłów z pliku
+
 def czytaj_wspolrzedne(plik):
     ksi = []
     eta = []
     with open(plik, 'r') as f:
         for line in f:
             values = list(map(float, line.split()))
-            ksi.append(values[0:4])  # Zakładamy, że mamy 4 węzły dla każdego elementu
-            eta.append(values[4:8])  # Kolejne 4 wartości to eta dla tych samych węzłów
+            ksi.append(values[0:4])
+            eta.append(values[4:8])
     return np.array(ksi), np.array(eta)
+
 
 # Funkcje kształtu dla 4-węzłowego elementu kwadratowego
 def funkcje_ksztaltu(ksi, eta):
@@ -19,11 +20,13 @@ def funkcje_ksztaltu(ksi, eta):
     N4 = 0.25 * (1 - ksi) * (1 + eta)
     return np.array([N1, N2, N3, N4])
 
+
 # Pochodne funkcji kształtu względem ksi i eta
 def pochodne_funkcji_ksztaltu(ksi, eta):
     dN_dksi = [-0.25 * (1 - eta), 0.25 * (1 - eta), 0.25 * (1 + eta), -0.25 * (1 + eta)]
     dN_deta = [-0.25 * (1 - ksi), -0.25 * (1 + ksi), 0.25 * (1 + ksi), 0.25 * (1 - ksi)]
     return np.array(dN_dksi), np.array(dN_deta)
+
 
 # Funkcja do obliczania Jakobianu w punkcie całkowania
 def jakobian(wsp_x, wsp_y, dN_dksi, dN_deta):
@@ -34,13 +37,16 @@ def jakobian(wsp_x, wsp_y, dN_dksi, dN_deta):
     J[1, 1] = np.dot(dN_deta, wsp_y)  # ∂y/∂η
     return J
 
+
 # Funkcja do obliczania wyznacznika Jakobianu
 def det_jakobianu(J):
     return np.linalg.det(J)
 
+
 # Funkcja do obliczania odwrotności Jakobianu
 def odwrotnosc_jakobianu(J):
     return np.linalg.inv(J)
+
 
 # Funkcja główna - przetwarza wszystkie punkty całkowania
 def oblicz_jakobian(plik):
@@ -88,5 +94,7 @@ def oblicz_jakobian(plik):
                 print("Jakobian jest osobliwy, brak odwrotności.")
             print("\n")
 
-# Przykład użycia funkcji - załóżmy, że mamy plik 'wspolrzedne.txt'
-oblicz_jakobian('wspolrzedne.txt')
+
+if __name__ == "__main__":
+    # Przykład użycia funkcji - załóżmy, że mamy plik 'wspolrzedne.txt'
+    oblicz_jakobian('wspolrzedne.txt')
