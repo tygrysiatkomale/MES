@@ -100,9 +100,8 @@ def oblicz_H_dla_elementow(plik, k):
     # Definiowanie punktów Gaussa i wag
     punkty_1D = [-1/np.sqrt(3), 1/np.sqrt(3)]
     wagi_1D = [1, 1]
-
     # Tworzenie siatki punktów Gaussa dla 2D (iloczyn kartezjański)
-    punkty_calek = [(ksi, eta) for ksi in punkty_1D for eta in punkty_1D]
+    punkty_calek = [(ksi, eta) for eta in punkty_1D for ksi in punkty_1D]
     wagi_calek = [w1 * w2 for w1 in wagi_1D for w2 in wagi_1D]
 
     # Iteracja przez elementy
@@ -112,6 +111,7 @@ def oblicz_H_dla_elementow(plik, k):
 
         # Obliczenie lokalnej macierzy H
         print(f"\nElement {elem + 1}:")
+        punkty_calek[2], punkty_calek[3] = punkty_calek[3], punkty_calek[2]
         H = oblicz_macierz_H_lokalna(wsp_x, wsp_y, punkty_calek, wagi_calek, k)
 
 
