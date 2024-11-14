@@ -49,25 +49,47 @@ def odwrotnosc_jakobianu(J):
     return np.linalg.inv(J)
 
 
-# Funkcja do obliczania macierzy H lokalnej
+# Funkcja do obliczania macierzy H lokalnej z wypisywaniem kroków
 def oblicz_macierz_H_lokalna(wsp_x, wsp_y, punkty_calek, wagi_calek, k):
     H = np.zeros((4, 4))  # Inicjalizacja lokalnej macierzy H
     for i, (ksi_pkt, eta_pkt) in enumerate(punkty_calek):
         waga = wagi_calek[i]
+        print(f"\nPunkt całkowania {i + 1}: ksi = {ksi_pkt}, eta = {eta_pkt}, waga = {waga}")
+
+        # Pochodne funkcji kształtu względem ksi i eta
         dN_dksi, dN_deta = pochodne_funkcji_ksztaltu(ksi_pkt, eta_pkt)
+        print(f"Pochodne funkcji kształtu względem ksi: {dN_dksi}")
+        print(f"Pochodne funkcji kształtu względem eta: {dN_deta}")
+
+        # Obliczanie Jakobianu
         J = jakobian(wsp_x, wsp_y, dN_dksi, dN_deta)
+        print(f"Jakobian J:\n{J}")
+
+        # Wyznacznik Jakobianu
         detJ = det_jakobianu(J)
+        print(f"Wyznacznik Jakobianu: {detJ}")
+
         if detJ == 0:
+            print("Pominięto punkt całkowania ze względu na zerowy wyznacznik Jacobiego.")
             continue  # Pomijamy punkt, jeśli wyznacznik Jacobiego jest zerowy
+
+        # Odwrotność Jakobianu
         J_inv = odwrotnosc_jakobianu(J)
+        print(f"Odwrotność Jakobianu J_inv:\n{J_inv}")
 
         # Obliczanie pochodnych względem x i y
         dN_dx = J_inv[0, 0] * dN_dksi + J_inv[0, 1] * dN_deta
         dN_dy = J_inv[1, 0] * dN_dksi + J_inv[1, 1] * dN_deta
+        print(f"Pochodne funkcji kształtu względem x: {dN_dx}")
 
-        # Składanie macierzy H
+        # Obliczanie macierzy H lokalnej w tym punkcie całkowania
         H_local = k * (np.outer(dN_dx, dN_dx) + np.outer(dN_dy, dN_dy)) * detJ * waga
+        print(f"Macierz H lokalna dla punktu całkowania {i + 1}:\n{H_local}")
+
+        # Dodanie H_local do całkowitej macierzy H
         H += H_local
+
+    print(f"\nLokalna macierz H dla elementu:\n{H}\n")
     return H
 
 
@@ -76,14 +98,16 @@ def oblicz_H_dla_elementow(plik, k):
     ksi_wsp, eta_wsp = czytaj_wspolrzedne(plik)
 
     # Definiowanie punktów Gaussa i wag
-    punkty_1D = [-np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5))),
-                 -np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
-                 np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
-                 np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5)))]
-    wagi_1D = [(18 - np.sqrt(30)) / 36,
-               (18 + np.sqrt(30)) / 36,
-               (18 + np.sqrt(30)) / 36,
-               (18 - np.sqrt(30)) / 36]
+    # punkty_1D = [-np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5))),
+    #              -np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
+    #              np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
+    #              np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5)))]
+    # wagi_1D = [(18 - np.sqrt(30)) / 36,
+    #            (18 + np.sqrt(30)) / 36,
+    #            (18 + np.sqrt(30)) / 36,
+    #            (18 - np.sqrt(30)) / 36]
+    punkty_1D = [-np.sqrt(3 / 5), 0, np.sqrt(3 / 5)]
+    wagi_1D = [5 / 9, 8 / 9, 5 / 9]
 
     # Tworzenie siatki punktów Gaussa dla 2D (iloczyn kartezjański)
     punkty_calek = [(ksi, eta) for ksi in punkty_1D for eta in punkty_1D]
@@ -95,11 +119,8 @@ def oblicz_H_dla_elementow(plik, k):
         wsp_y = eta_wsp[elem]
 
         # Obliczenie lokalnej macierzy H
+        print(f"\nElement {elem + 1}:")
         H = oblicz_macierz_H_lokalna(wsp_x, wsp_y, punkty_calek, wagi_calek, k)
-
-        # Wyświetlenie macierzy H dla elementu
-        print(f"Element {elem + 1}:")
-        print(f"Lokalna macierz H:\n{H}\n")
 
 
 # Przykładowe wywołanie
