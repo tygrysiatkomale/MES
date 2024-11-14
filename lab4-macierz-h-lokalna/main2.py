@@ -33,8 +33,8 @@ def pochodne_funkcji_ksztaltu(ksi, eta):
 def jakobian(wsp_x, wsp_y, dN_dksi, dN_deta):
     J = np.zeros((2, 2))
     J[0, 0] = np.dot(dN_dksi, wsp_x)  # ∂x/∂ξ
-    J[0, 1] = np.dot(dN_deta, wsp_x)  # ∂x/∂η
-    J[1, 0] = np.dot(dN_dksi, wsp_y)  # ∂y/∂ξ
+    J[1, 0] = np.dot(dN_deta, wsp_x)  # ∂x/∂η
+    J[0, 1] = np.dot(dN_dksi, wsp_y)  # ∂y/∂ξ
     J[1, 1] = np.dot(dN_deta, wsp_y)  # ∂y/∂η
     return J
 
@@ -98,16 +98,8 @@ def oblicz_H_dla_elementow(plik, k):
     ksi_wsp, eta_wsp = czytaj_wspolrzedne(plik)
 
     # Definiowanie punktów Gaussa i wag
-    # punkty_1D = [-np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5))),
-    #              -np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
-    #              np.sqrt(3 / 7 - (2 / 7 * np.sqrt(6 / 5))),
-    #              np.sqrt(3 / 7 + (2 / 7 * np.sqrt(6 / 5)))]
-    # wagi_1D = [(18 - np.sqrt(30)) / 36,
-    #            (18 + np.sqrt(30)) / 36,
-    #            (18 + np.sqrt(30)) / 36,
-    #            (18 - np.sqrt(30)) / 36]
-    punkty_1D = [-np.sqrt(3 / 5), 0, np.sqrt(3 / 5)]
-    wagi_1D = [5 / 9, 8 / 9, 5 / 9]
+    punkty_1D = [-1/np.sqrt(3), 1/np.sqrt(3)]
+    wagi_1D = [1, 1]
 
     # Tworzenie siatki punktów Gaussa dla 2D (iloczyn kartezjański)
     punkty_calek = [(ksi, eta) for ksi in punkty_1D for eta in punkty_1D]
@@ -126,4 +118,4 @@ def oblicz_H_dla_elementow(plik, k):
 # Przykładowe wywołanie
 if __name__ == "__main__":
     k = 30.0  # Przykładowy współczynnik przewodzenia ciepła
-    oblicz_H_dla_elementow('wspolrzedne.txt', k)
+    oblicz_H_dla_elementow('wspolrzedne2.txt', k)
