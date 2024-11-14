@@ -8,8 +8,8 @@ def czytaj_wspolrzedne(plik):
     with open(plik, 'r') as f:
         for line in f:
             values = list(map(float, line.split()))
-            ksi.append(values[0:4])  # Zakładamy, że mamy 4 węzły dla każdego elementu
-            eta.append(values[4:8])  # Kolejne 4 wartości to eta dla tych samych węzłów
+            ksi.append(values[0:4])
+            eta.append(values[4:8])
     return np.array(ksi), np.array(eta)
 
 
