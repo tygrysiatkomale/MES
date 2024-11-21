@@ -117,5 +117,5 @@ def oblicz_H_dla_elementow(plik, k):
 
 # Przykładowe wywołanie
 if __name__ == "__main__":
-    k = 30.0  # Przykładowy współczynnik przewodzenia ciepła
+    k = 30.0
     oblicz_H_dla_elementow('wspolrzedne2.txt', k)
