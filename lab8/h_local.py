@@ -200,7 +200,7 @@ def oblicz_Hbc_i_P_lokalne(wsp_x, wsp_y, BC_nodes, alfa, Tot):
                 # Obliczamy wkład do Hbc: alfa * N2D^T * N2D * detJ_1D * w
                 # Obliczamy wkład do P: - alfa * Tot * N2D * detJ_1D * w
                 Hbc_local = alfa * np.outer(N2D, N2D) * detJ_1D * w
-                P_local = - alfa * Tot * N2D * detJ_1D * w  # Zmieniony znak
+                P_local = alfa * Tot * N2D * detJ_1D * w
 
                 Hbc += Hbc_local
                 P += P_local
