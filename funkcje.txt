@@ -1,0 +1,93 @@
+Element.py
+ - calculate_jacobian - obliczanie elementów macierzy jako sumy iloczynów pochodnych funkcji kształtu względem współrzędnych lokalnych i współrzędnych węzłów elementu
+ - calculate_jacobian_det - obliczanie wyznacznika jakobianu i odwrotności jakobianu
+ - calculate_matrix_x - transformacja pochodnych funkcji kształtu do układu globalnego
+ - calculate_matrix_y - transformacja pochodnych funkcji kształtu do układu globalnego
+ - calculate_matrix_h - obliczanie macierzy sztywności h poprzez sumowanie wkładów z poszczególnych punktów całkowania
+ - calculate_det_j_bc - obliczanie długości krawędzi elementu. Służy do poprawnego skalowania całkowania po brzegach elementu. Używa się do liczenia hbc i p
+ - calculate_matrix_Hbc - uwzględnienie warunków brzegowych (boundary conditions) sprawdzenie czy elementy należą do brzegu, uwzględnia współczynnik konwekcji alpha
+ - calculate_vector_P - obliczanie wektora prawych stron dla krawędzi z warunkiem brzegowym 
+ - calculate_matrix_C - obliczanie macierzy pojemności cieplnej c
+
+UniversalElement.py
+ - initialize_ksi_eta - generuje punkty całkowania Gaussa dla schematu 2, 3 i 4 punktowego
+ - initalize_ksi_eta_bc -
+ - calculate_dNs - oblicza pochodne funkcji kształtu względem ksi i eta. Potrzebne do transformacji współrzędnych i liczenia macierzy jakobiego 
+ - calculate_dNdKsi - wyprowadza pochodne funkcji kształtu dla elementu 4-węzłowego
+ - calculate_dNdEta - 
+ - calculate_N_bc - definiowanie funkcji kształtu dla warunków brzegowych, interpolacja na krawędziach elementu
+ - calculate_N - definiowanie funkcji kształtu, interpolacja między węzłami
+
+Macierz Jacobiego:	Przekształca układ lokalny na globalny
+	- służy do transformacji współrzędnych z lokalnych na globalne
+	- wyznacznik pozwala skalować całki w układzie globalnym
+	- odwrotność macierzy pozwala na transformacje gradientów funkcji kształtu
+
+Funkcje kształtu:	Aproksymują rozkład temperatury w elemencie
+	- służą do aproksymacji rozkładu pola w obrębie elementu
+	- Interpolują wartości w dowolnym punkcie elementu
+	- Przyjmują wartości między 0 a 1 (1 w odpowiednim węźle a 0 w pozostałych)
+	- Suma wszystkich = 1
+	- ksi i eta wartości od -1 do 1
+	
+Macierz sztywności H:	Modeluje przewodzenie ciepła w elemencie
+	- modeluje przewodzenie ciepła w elemencie
+	- odpowiada za dyfuzje ciepła
+	- uwzględnia wpływ gradientu temperatury
+
+Macierz Hbc:		Reprezentuje warunki brzegowe konwekcji
+	- Opisuje warunek konwekcji na brzegu elementu
+	- Modeluje wymianę ciepła z otoczeniem
+	- Uwzględnia przekształcenie długości krawędzi przy użyciu macierzy Jacobiego
+
+Wektor P:		Odpowiada za efekt temperatury otoczenia 
+	- Reprezentuje strumień cieplny wynikający z konwekcji
+	- Jest dodawany do globalnego wektora równań jako dodatkowe źródło
+	- W kodzie liczony przez całkowanie po krawędzi z wykorzystaniem punktów Gaussa
+
+Macierz pojemności cieplnej C:		Opisuje zdolność do przechowywania ciepła
+	- Odpowiada za zdolność elementu do przechowywania ciepła
+	- Odpowiada za modelowanie efektów bezwładności cieplnej
+	- Uwzględnia wpływ przechowywania ciepła przez materiał
+	- Jest zależna od czasu
+	
+
+
+
+
+
+
+Co to jest Jacobian i po co jest liczony? : 
+		Jacobian to macierz przekształcenia między układem lokalnym (ksi i eta) a układem globalnym (x i y). 
+		Jest liczony żeby poprawnie przekształcić przekształcać pochodne funkcji kształtu do układu globalnego i do skalowania całek numerycznych
+
+
+Własności funkcji kształtu :
+		Wartości od 0 do 1 (1 dla swojego węzła a 0 dla pozostałych)
+		Suma wszystkich = 1 
+		Są ciągłe wewnątrz elementu ale ich pochodne mogą być nieciągłe na granicach
+		Umożliwiają interpolacje wielkości fizycznych w elemencie
+
+
+Co dodajemy do problemu niestacjonarnego? :
+		Dodajemy macierz pojemności cieplnej C, która uwzględnia zależność od czasu i opisuje zdolność materiału do magazynowania ciepła
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
